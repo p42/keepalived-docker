@@ -1,0 +1,61 @@
+#!/usr/bin/with-contenv sh
+
+# Shell Colors
+set_shell_error() {
+  echo -e "\e[1m" # Style: bold
+  echo -e "\e[5m" # Style: blink
+  echo -e "\e[31m" # Text Color: Red
+}
+
+set_shell_info() {
+  echo -e "\e[1m" # Style: bold
+  echo -e "\e[33m" # Text Color: Yellow
+}
+
+set_shell_pass() {
+  echo -e "\e[1m" # Style: bold
+  echo -e "\e[32m" # Text Color: Green
+}
+
+set_shell_warning() {
+  echo -e "\e[1m" # Style: bold
+  echo -e "\e[35m" # Text Color: Magenta
+}
+
+reset_shell() {
+  echo -e "\e[0m" # Reset all shell attributes
+}
+
+# Write Keepalived Proxy Config
+set_keepalived_config() {
+  set_shell_info
+  echo "Creating /etc/keepalived/keepalived.conf"
+  reset_shell
+
+  sed -ie "s/###STATE###/${STATE}/g" /etc/keepalived/keepalived.conf
+  sed -ie "s/###INTERFACE###/${INTERFACE}/g" /etc/keepalived/keepalived.conf
+  sed -ie "s/###VRRPID###/${VRRPID}/g" /etc/keepalived/keepalived.conf
+  sed -ie "s/###PRIORITY###/${PRIORITY}/g" /etc/keepalived/keepalived.conf
+  sed -ie "s/###PASSWORD###/${PASSWORD}/g" /etc/keepalived/keepalived.conf
+  sed -ie "s/###VIP###/${VIP}/g" /etc/keepalived/keepalived.conf
+
+  # This is ugly but it gets the Job done at least for now as long as there are no other ","
+  sed -ie 's/,/\n        /g' /etc/keepalived/keepalived.conf
+
+}
+
+# variables
+
+# Read ENV variables
+STATE=${STATE:="MASTER"}
+INTERFACE=${INTERFACE:="eth0"}
+VRRPID=${VRRPID:="51"}
+PRIORITY=${PRIORITY:="100"}
+PASSWORD=${PASSWORD:="123454321"}
+VIP=${VIP:="10.0.0.10"}
+
+set_keepalived_config
+
+set_shell_info
+echo "Completed Initializing Keepalived"
+reset_shell
