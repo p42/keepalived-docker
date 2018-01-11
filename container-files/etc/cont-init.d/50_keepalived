@@ -29,7 +29,7 @@ reset_shell() {
 # Write Keepalived Proxy Config
 set_keepalived_config() {
   set_shell_info
-  echo "Creating /etc/keepalived/keepalived.conf"
+  echo "Setting Variables in /etc/keepalived/keepalived.conf"
   reset_shell
 
   sed -ie "s/###STATE###/${STATE}/g" /etc/keepalived/keepalived.conf
@@ -37,11 +37,16 @@ set_keepalived_config() {
   sed -ie "s/###VRRPID###/${VRRPID}/g" /etc/keepalived/keepalived.conf
   sed -ie "s/###PRIORITY###/${PRIORITY}/g" /etc/keepalived/keepalived.conf
   sed -ie "s/###PASSWORD###/${PASSWORD}/g" /etc/keepalived/keepalived.conf
-  sed -ie "s/###VIP###/${VIP}/g" /etc/keepalived/keepalived.conf
 
-  # This is ugly but it gets the Job done at least for now as long as there are no other ","
-  sed -ie 's/,/\n        /g' /etc/keepalived/keepalived.conf
+  for cidr in ${VIP//,/ }
+  do
+    set_shell_info
+    echo "Adding IP: ${cidr}"
+    reset_shell
 
+    ESCAPED_CIDR=$(echo "${cidr}" | sed 's/\//\\\//g')
+    sed -ie "s/virtual_ipaddress {/virtual_ipaddress {\n        ${ESCAPED_CIDR}/g" /etc/keepalived/keepalived.conf
+  done
 }
 
 # variables
